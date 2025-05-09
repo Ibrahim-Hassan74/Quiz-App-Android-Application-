@@ -82,25 +82,37 @@
                 android:layout_marginTop="12dp"
                 android:paddingBottom="16dp" />
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_add_quiz"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="@color/blue"
-                android:text="Add Quiz"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                app:cornerRadius="16dp"
-                app:icon="@drawable/ic_add"
-                app:iconGravity="textStart"
-                app:iconPadding="8dp"
-                app:iconTint="@color/white" />
+            <!--            <com.google.android.material.button.MaterialButton-->
+            <!--                android:id="@+id/btn_add_quiz"-->
+            <!--                android:layout_width="match_parent"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_marginTop="24dp"-->
+            <!--                android:layout_marginBottom="16dp"-->
+            <!--                android:backgroundTint="@color/blue"-->
+            <!--                android:text="Add Quiz"-->
+            <!--                android:textColor="@color/white"-->
+            <!--                android:textSize="16sp"-->
+            <!--                android:textStyle="bold"-->
+            <!--                app:cornerRadius="16dp"-->
+            <!--                app:icon="@drawable/ic_add"-->
+            <!--                app:iconGravity="textStart"-->
+            <!--                app:iconPadding="8dp"-->
+            <!--                app:iconTint="@color/white" />-->
+
 
         </LinearLayout>
     </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/btn_add_quiz"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/blue"
+        android:contentDescription="Add new quiz"
+        app:srcCompat="@drawable/ic_add"
+        app:tint="@android:color/white" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -109,4 +121,3 @@
         android:layout_gravity="center"
         android:visibility="gone" />
 </FrameLayout>
-

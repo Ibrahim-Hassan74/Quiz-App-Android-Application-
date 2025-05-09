@@ -2,6 +2,7 @@ package com.example.exams
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -9,12 +10,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.exams.Adabter.QuizListAdapter
-import com.example.exams.Fragment.AddQuestionFragment
 import com.example.exams.Models.QuestionModel
 import com.example.exams.Models.QuizModel
+import com.example.exams.api.RetrofitClient
 import com.example.exams.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -44,42 +47,39 @@ class MainActivity : AppCompatActivity() {
         binding.progressBar.visibility = View.GONE
         quizListAdapter = QuizListAdapter(quizModelList)
         binding.recyclerView.layoutManager =
-            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = quizListAdapter
     }
 
     private fun getData() {
         binding.progressBar.visibility = View.VISIBLE
-        val listQustionModel = mutableListOf<QuestionModel>()
 
-        listQustionModel.add(
-            QuestionModel(
-                "What is android OS?", mutableListOf("Language", "OS", "App", "Software"), "OS"
-            )
-        )
-        listQustionModel.add(
-            QuestionModel(
-                "Who owner of andriod",
-                mutableListOf("Google", "Apple", "Microsoft", "Facebook"),
-                "Google"
-            )
-        )
-        listQustionModel.add(
-            QuestionModel(
-                "What is programming language can build mobile app?",
-                mutableListOf("Kotlie", "Java", "C++", "A & B"),
-                "A & B"
-            )
-        )
-
-//        quizModelList.add(QuizModel("1", "Quiz 1", "All Math basic", "10", listQustionModel))
-
-        if (quizModelList.isEmpty())
-            quizModelList.add(QuizModel("1", "Quiz 1", "All Math basic", "10", listQustionModel))
-
-        initRecyclerView()
-
-
+        // Using coroutine to make the API call
+        lifecycleScope.launch {
+            try {
+                val response = RetrofitClient.quizApi.getQuizzes()
+                if (response.isSuccessful) {
+                    val quizzes = response.body()
+                    if (quizzes != null) {
+                        quizModelList.clear()
+                        quizModelList.addAll(quizzes)
+                        initRecyclerView()
+                    } else {
+                        showError("No quizzes available")
+                    }
+                } else {
+                    showError("Failed to load quizzes: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                showError("Error: ${e.message}")
+                Log.e("MainActivity", "Error: ${e.message}", e)
+            } finally {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
     }
 
+    private fun showError(message: String) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+    }
 }

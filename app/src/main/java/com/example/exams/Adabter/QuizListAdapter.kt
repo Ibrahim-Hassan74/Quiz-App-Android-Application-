@@ -27,7 +27,7 @@ class QuizListAdapter(private val quizModelList: List<QuizModel>) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(model: QuizModel) {
             binding.apply {
-                quizTitleText.text = model.Title
+                quizTitleText.text = model.title
                 quizSubtitleText.text = model.subTitle
                 quizTimeText.text = model.time + " min"
                 root.setOnClickListener {

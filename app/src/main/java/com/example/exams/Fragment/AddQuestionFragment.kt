@@ -2,19 +2,20 @@ package com.example.exams.Fragment
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.lifecycle.lifecycleScope
 import com.example.exams.MainActivity
 import com.example.exams.Models.QuestionModel
 import com.example.exams.Models.QuizModel
-import com.example.exams.QuizActivity
 import com.example.exams.R
+import com.example.exams.api.RetrofitClient
 import com.example.exams.databinding.FragmentAddQuestionBinding
-import com.example.exams.databinding.FragmentAddSingleQuestionBinding
-import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 import java.util.UUID
 
 class AddQuestionFragment : Fragment() {
@@ -79,15 +80,42 @@ class AddQuestionFragment : Fragment() {
                 }
                 val quiz = QuizModel(
                     id = UUID.randomUUID().toString(),
-                    Title = title,
+                    title = title,
                     subTitle = subTitle,
                     time = time.toString(),
                     question = copiedQuestions.toMutableList()
                 )
-                questionModelList.clear()
-                MainActivity.quizModelList.add(quiz)
-                val intent = Intent(requireContext(), MainActivity::class.java)
-                startActivity(intent)
+//                questionModelList.clear()
+//                MainActivity.quizModelList.add(quiz)
+//                val intent = Intent(requireContext(), MainActivity::class.java)
+//                startActivity(intent)
+
+
+                lifecycleScope.launch {
+                    try {
+                        val response = RetrofitClient.quizApi.createQuiz(quiz)
+                        if (response.isSuccessful) {
+                            Toast.makeText(
+                                requireContext(),
+                                "Quiz added successfully",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            val intent = Intent(requireContext(), MainActivity::class.java)
+                            startActivity(intent)
+                        } else {
+                            Toast.makeText(
+                                requireContext(),
+                                "Failed to add quiz: ${response.code()}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
+                        Log.e("AddQuiz", "Error posting quiz", e)
+                    }
+                }
+
             }
         }
     }

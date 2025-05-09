@@ -45,7 +45,7 @@ class QuizActivity : AppCompatActivity(), View.OnClickListener {
 
     // Stores the user's selected answers for each question by index.
     // This helps calculate the final score and restore selections when navigating between questions.
-    val userAnswers = mutableMapOf<Int, String>()
+    val userAnswers = mutableMapOf<Int, String?>()
 
 
     // enable binding
@@ -235,9 +235,14 @@ class QuizActivity : AppCompatActivity(), View.OnClickListener {
     private fun finishQuiz() {
         // Submit logic
 
-        for ((index, answer) in userAnswers) {
-            if (answer == questionModelList[index].correctOption) score++
+        for (i in questionModelList.indices) {
+            val userAnswer = userAnswers[i]
+            val correctAnswer = questionModelList[i].correctOption
+            if (userAnswer != null && userAnswer == correctAnswer) {
+                score++
+            }
         }
+
 
         val totalQuestions = questionModelList.size
         val percentage = ((score.toFloat() / totalQuestions.toFloat()) * 100).toInt()
