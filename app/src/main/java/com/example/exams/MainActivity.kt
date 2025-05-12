@@ -17,7 +17,9 @@ import com.example.exams.Models.QuestionModel
 import com.example.exams.Models.QuizModel
 import com.example.exams.api.RetrofitClient
 import com.example.exams.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -45,7 +47,36 @@ class MainActivity : AppCompatActivity() {
 
     private fun initRecyclerView() {
         binding.progressBar.visibility = View.GONE
-        quizListAdapter = QuizListAdapter(quizModelList)
+
+        quizListAdapter = QuizListAdapter(quizModelList) { quiz ->
+            lifecycleScope.launch {
+                try {
+                    val response = withContext(Dispatchers.IO) {
+                        RetrofitClient.quizApi.deleteQuiz(quiz.id)
+                    }
+
+                    if (response.isSuccessful) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Deleted: ${quiz.title}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        getData()
+                    } else {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Failed to delete quiz",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                } catch (e: Exception) {
+                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
+        }
+
+
         binding.recyclerView.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         binding.recyclerView.adapter = quizListAdapter
