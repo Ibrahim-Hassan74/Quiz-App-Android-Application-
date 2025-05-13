@@ -8,6 +8,7 @@ import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface QuizApi {
@@ -19,6 +20,9 @@ interface QuizApi {
 
     @DELETE("api/quizzes/{id}")
     suspend fun deleteQuiz(@Path("id") id: String): Response<Unit>
+
+    @PUT("api/quizzes/{id}")
+    suspend fun updateQuiz(@Path("id") id: String, @Body quiz: QuizModel): Response<Unit>
 }
 
 object RetrofitClient {

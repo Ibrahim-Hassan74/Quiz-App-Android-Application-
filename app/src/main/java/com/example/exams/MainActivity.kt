@@ -6,15 +6,13 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.exams.Adabter.QuizListAdapter
-import com.example.exams.Models.QuestionModel
 import com.example.exams.Models.QuizModel
+import com.example.exams.Models.QuizTransferHelper
 import com.example.exams.api.RetrofitClient
 import com.example.exams.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +26,13 @@ class MainActivity : AppCompatActivity() {
 
     lateinit var binding: ActivityMainBinding
     lateinit var quizListAdapter: QuizListAdapter
+    private val updateQuizResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                getData()
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -40,6 +45,10 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        binding.availableQuizzes.setOnClickListener {
+            getData()
+        }
+
         getData()
 
 //        Toast.makeText(this, "Welcome", Toast.LENGTH_SHORT).show()
@@ -48,33 +57,41 @@ class MainActivity : AppCompatActivity() {
     private fun initRecyclerView() {
         binding.progressBar.visibility = View.GONE
 
-        quizListAdapter = QuizListAdapter(quizModelList) { quiz ->
-            lifecycleScope.launch {
-                try {
-                    val response = withContext(Dispatchers.IO) {
-                        RetrofitClient.quizApi.deleteQuiz(quiz.id)
-                    }
+        quizListAdapter = QuizListAdapter(
+            quizModelList,
+            onDelete = { quiz ->
+                lifecycleScope.launch {
+                    try {
+                        val response = withContext(Dispatchers.IO) {
+                            RetrofitClient.quizApi.deleteQuiz(quiz.id)
+                        }
 
-                    if (response.isSuccessful) {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Deleted: ${quiz.title}",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        getData()
-                    } else {
-                        Toast.makeText(
-                            this@MainActivity,
-                            "Failed to delete quiz",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        if (response.isSuccessful) {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Deleted: ${quiz.title}",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            getData()
+                        } else {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "Failed to delete quiz",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
+                            .show()
                     }
-                } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, "Error: ${e.message}", Toast.LENGTH_SHORT)
-                        .show()
                 }
+            },
+            onEdit = { quiz ->
+                QuizTransferHelper.selectedQuiz = quiz
+                val intent = Intent(this, UpdateQuestionActivity::class.java)
+                updateQuizResultLauncher.launch(intent)
             }
-        }
+        )
 
 
         binding.recyclerView.layoutManager =

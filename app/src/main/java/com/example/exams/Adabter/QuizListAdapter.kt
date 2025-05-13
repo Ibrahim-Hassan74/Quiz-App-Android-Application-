@@ -14,7 +14,8 @@ import com.example.exams.R
 
 class QuizListAdapter(
     private val quizModelList: List<QuizModel>,
-    private val onDelete: (QuizModel) -> Unit // كولباك الحذف
+    private val onDelete: (QuizModel) -> Unit,
+    private val onEdit: (QuizModel) -> Unit
 ) : RecyclerView.Adapter<QuizListAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -61,11 +62,7 @@ class QuizListAdapter(
             popup.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.menu_edit -> {
-                        Toast.makeText(
-                            view.context,
-                            "Edit clicked: ${model.title}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        onEdit(model)
                         true
                     }
 
